@@ -1,6 +1,7 @@
-module Page.Slug_ exposing (Model, Msg, Data, page)
+module Page.Slug_ exposing (Data, Model, Msg, page)
 
 import DataSource exposing (DataSource)
+import DataSource.Glob as Glob
 import Head
 import Head.Seo as Seo
 import Page exposing (Page, PageWithState, StaticPayload)
@@ -17,8 +18,10 @@ type alias Model =
 type alias Msg =
     Never
 
+
 type alias RouteParams =
     { slug : String }
+
 
 page : Page RouteParams Data
 page =
@@ -32,13 +35,23 @@ page =
 
 routes : DataSource (List RouteParams)
 routes =
-    DataSource.fail "Add some routes"
+    --DataSource.succeed
+    --    [ helloRoute
+    --    , { slug = "goodbye" }
+    --    ]
+    Glob.succeed { slug = "hello" }
+        |> Glob.toDataSource
+
+
+helloRoute : DataSource RouteParams
+helloRoute =
+    RouteParams "hello"
+        |> DataSource.succeed
 
 
 data : RouteParams -> DataSource Data
 data routeParams =
     DataSource.succeed ()
-
 
 
 head :
@@ -71,4 +84,4 @@ view :
     -> StaticPayload Data RouteParams
     -> View Msg
 view maybeUrl sharedModel static =
-    View.placeholder "Slug_"
+    View.placeholder ("You are on the " ++ static.routeParams.slug ++ " page")
