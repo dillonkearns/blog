@@ -59,18 +59,50 @@ nestedFilesMd =
         |> Glob.toDataSource
 
 
-helloRoute : DataSource RouteParams
-helloRoute =
-    RouteParams "hello"
-        |> DataSource.succeed
+findFileBySlug : RouteParams -> DataSource String
+findFileBySlug routeParams =
+    let
+        withIndex =
+            Glob.succeed identity
+                |> Glob.match (Glob.literal "../content/blog/")
+                |> Glob.match (Glob.literal routeParams.slug)
+                |> Glob.match (Glob.literal "/index.md")
+                |> Glob.capture Glob.fullFilePath
+                |> Glob.toDataSource
+
+        withoutIndex =
+            Glob.succeed identity
+                |> Glob.match (Glob.literal "../content/blog/")
+                |> Glob.match (Glob.literal routeParams.slug)
+                |> Glob.match (Glob.literal ".md")
+                |> Glob.capture Glob.fullFilePath
+                |> Glob.toDataSource
+    in
+    DataSource.map2 (++) withIndex withoutIndex
+        |> DataSource.andThen
+            (\matchingFiles ->
+                case matchingFiles of
+                    [ file ] ->
+                        DataSource.succeed file
+
+                    [] ->
+                        DataSource.fail "No files matched."
+
+                    _ ->
+                        DataSource.fail "More than one file matched."
+            )
 
 
 data : RouteParams -> DataSource Data
 data routeParams =
-    OptimizedDecoder.map2 Data
-        DataSource.File.body
-        (DataSource.File.frontmatter (OptimizedDecoder.field "title" OptimizedDecoder.string))
-        |> DataSource.File.request ("../content/blog/" ++ routeParams.slug ++ ".md")
+    findFileBySlug routeParams
+        |> DataSource.andThen
+            (\filePath ->
+                OptimizedDecoder.map2 Data
+                    DataSource.File.body
+                    (DataSource.File.frontmatter (OptimizedDecoder.field "title" OptimizedDecoder.string))
+                    |> DataSource.File.request filePath
+            )
 
 
 head :
@@ -94,8 +126,8 @@ head static =
 
 
 type alias Data =
-    { title : String
-    , body : String
+    { body : String
+    , title : String
     }
 
 
