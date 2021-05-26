@@ -1,6 +1,7 @@
 module Page.Slug_ exposing (Data, Model, Msg, page)
 
 import DataSource exposing (DataSource)
+import DataSource.File
 import DataSource.Glob as Glob
 import Head
 import Head.Seo as Seo
@@ -35,7 +36,7 @@ page =
 
 routes : DataSource (List RouteParams)
 routes =
-    DataSource.map2 (++) rootFilesMd rootFiles2Md
+    DataSource.map2 (++) rootFilesMd nestedFilesMd
 
 
 rootFilesMd : DataSource (List RouteParams)
@@ -47,8 +48,8 @@ rootFilesMd =
         |> Glob.toDataSource
 
 
-rootFiles2Md : DataSource (List RouteParams)
-rootFiles2Md =
+nestedFilesMd : DataSource (List RouteParams)
+nestedFilesMd =
     Glob.succeed RouteParams
         |> Glob.match (Glob.literal "../content/blog/")
         |> Glob.capture Glob.wildcard
@@ -64,7 +65,9 @@ helloRoute =
 
 data : RouteParams -> DataSource Data
 data routeParams =
-    DataSource.succeed ()
+    -- DataSource.succeed { markdown = "# Hello" }
+    DataSource.File.request ("../content/blog/" ++ routeParams.slug ++ ".md") DataSource.File.body
+        |> DataSource.map Data
 
 
 head :
@@ -88,7 +91,8 @@ head static =
 
 
 type alias Data =
-    ()
+    { markdown : String
+    }
 
 
 view :
@@ -97,4 +101,4 @@ view :
     -> StaticPayload Data RouteParams
     -> View Msg
 view maybeUrl sharedModel static =
-    View.placeholder ("You are on the " ++ static.routeParams.slug ++ " page")
+    View.placeholder ("You are on the " ++ static.routeParams.slug ++ " page (" ++ static.data.markdown ++ ")")
