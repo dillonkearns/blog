@@ -5,6 +5,7 @@ import DataSource.File
 import DataSource.Glob as Glob
 import Head
 import Head.Seo as Seo
+import Html
 import Page exposing (Page, PageWithState, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
@@ -101,4 +102,11 @@ view :
     -> StaticPayload Data RouteParams
     -> View Msg
 view maybeUrl sharedModel static =
-    View.placeholder ("You are on the " ++ static.routeParams.slug ++ " page (" ++ static.data.markdown ++ ")")
+    { title = static.routeParams.slug
+    , body =
+        [ Html.h2 [] [ Html.text ("You are on the " ++ static.routeParams.slug ++ " page") ]
+        , Html.pre []
+            [ Html.text static.data.markdown
+            ]
+        ]
+    }
