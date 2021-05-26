@@ -6,6 +6,7 @@ import DataSource.Glob as Glob
 import Head
 import Head.Seo as Seo
 import Html
+import OptimizedDecoder
 import Page exposing (Page, PageWithState, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
@@ -66,9 +67,10 @@ helloRoute =
 
 data : RouteParams -> DataSource Data
 data routeParams =
-    -- DataSource.succeed { markdown = "# Hello" }
-    DataSource.File.request ("../content/blog/" ++ routeParams.slug ++ ".md") DataSource.File.body
-        |> DataSource.map Data
+    OptimizedDecoder.map2 Data
+        DataSource.File.body
+        (DataSource.File.frontmatter (OptimizedDecoder.field "title" OptimizedDecoder.string))
+        |> DataSource.File.request ("../content/blog/" ++ routeParams.slug ++ ".md")
 
 
 head :
@@ -92,7 +94,8 @@ head static =
 
 
 type alias Data =
-    { markdown : String
+    { title : String
+    , body : String
     }
 
 
@@ -104,9 +107,9 @@ view :
 view maybeUrl sharedModel static =
     { title = static.routeParams.slug
     , body =
-        [ Html.h2 [] [ Html.text ("You are on the " ++ static.routeParams.slug ++ " page") ]
+        [ Html.h2 [] [ Html.text static.data.title ]
         , Html.pre []
-            [ Html.text static.data.markdown
+            [ Html.text static.data.body
             ]
         ]
     }
