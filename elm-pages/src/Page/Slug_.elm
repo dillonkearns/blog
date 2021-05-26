@@ -35,12 +35,25 @@ page =
 
 routes : DataSource (List RouteParams)
 routes =
+    DataSource.map2 (++) rootFilesMd rootFiles2Md
+
+
+rootFilesMd : DataSource (List RouteParams)
+rootFilesMd =
     Glob.succeed RouteParams
         |> Glob.match (Glob.literal "../content/blog/")
         |> Glob.capture Glob.wildcard
         |> Glob.match (Glob.literal ".md")
         |> Glob.toDataSource
-        |> DataSource.map (Debug.log "routes")
+
+
+rootFiles2Md : DataSource (List RouteParams)
+rootFiles2Md =
+    Glob.succeed RouteParams
+        |> Glob.match (Glob.literal "../content/blog/")
+        |> Glob.capture Glob.wildcard
+        |> Glob.match (Glob.literal "/index.md")
+        |> Glob.toDataSource
 
 
 helloRoute : DataSource RouteParams
