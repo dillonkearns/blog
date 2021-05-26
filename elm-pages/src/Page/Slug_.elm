@@ -35,12 +35,12 @@ page =
 
 routes : DataSource (List RouteParams)
 routes =
-    --DataSource.succeed
-    --    [ helloRoute
-    --    , { slug = "goodbye" }
-    --    ]
-    Glob.succeed { slug = "hello" }
+    Glob.succeed RouteParams
+        |> Glob.match (Glob.literal "../content/blog/")
+        |> Glob.capture Glob.wildcard
+        |> Glob.match (Glob.literal ".md")
         |> Glob.toDataSource
+        |> DataSource.map (Debug.log "routes")
 
 
 helloRoute : DataSource RouteParams
