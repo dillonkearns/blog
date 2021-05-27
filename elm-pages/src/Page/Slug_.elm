@@ -38,59 +38,32 @@ page =
 
 routes : DataSource (List RouteParams)
 routes =
-    DataSource.map2 (++) rootFilesMd nestedFilesMd
-
-
-rootFilesMd : DataSource (List RouteParams)
-rootFilesMd =
     Glob.succeed RouteParams
         |> Glob.match (Glob.literal "../content/blog/")
         |> Glob.capture Glob.wildcard
+        |> Glob.match
+            (Glob.oneOf
+                ( ( "", () )
+                , [ ( "/index", () ) ]
+                )
+            )
         |> Glob.match (Glob.literal ".md")
-        |> Glob.toDataSource
-
-
-nestedFilesMd : DataSource (List RouteParams)
-nestedFilesMd =
-    Glob.succeed RouteParams
-        |> Glob.match (Glob.literal "../content/blog/")
-        |> Glob.capture Glob.wildcard
-        |> Glob.match (Glob.literal "/index.md")
         |> Glob.toDataSource
 
 
 findFileBySlug : RouteParams -> DataSource String
 findFileBySlug routeParams =
-    let
-        withIndex =
-            Glob.succeed identity
-                |> Glob.match (Glob.literal "../content/blog/")
-                |> Glob.match (Glob.literal routeParams.slug)
-                |> Glob.match (Glob.literal "/index.md")
-                |> Glob.capture Glob.fullFilePath
-                |> Glob.toDataSource
-
-        withoutIndex =
-            Glob.succeed identity
-                |> Glob.match (Glob.literal "../content/blog/")
-                |> Glob.match (Glob.literal routeParams.slug)
-                |> Glob.match (Glob.literal ".md")
-                |> Glob.capture Glob.fullFilePath
-                |> Glob.toDataSource
-    in
-    DataSource.map2 (++) withIndex withoutIndex
-        |> DataSource.andThen
-            (\matchingFiles ->
-                case matchingFiles of
-                    [ file ] ->
-                        DataSource.succeed file
-
-                    [] ->
-                        DataSource.fail "No files matched."
-
-                    _ ->
-                        DataSource.fail "More than one file matched."
+    Glob.succeed ()
+        |> Glob.match (Glob.literal "../content/blog/")
+        |> Glob.match (Glob.literal routeParams.slug)
+        |> Glob.match
+            (Glob.oneOf
+                ( ( "", () )
+                , [ ( "/index", () ) ]
+                )
             )
+        |> Glob.match (Glob.literal ".md")
+        |> Glob.expectUniqueFile
 
 
 data : RouteParams -> DataSource Data
