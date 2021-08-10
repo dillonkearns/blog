@@ -6,6 +6,7 @@ import DataSource.Glob as Glob
 import Head
 import Head.Seo as Seo
 import Html
+import Markdown
 import OptimizedDecoder
 import Page exposing (Page, PageWithState, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
@@ -117,8 +118,6 @@ view maybeUrl sharedModel static =
     { title = static.routeParams.slug
     , body =
         [ Html.h2 [] [ Html.text static.data.title ]
-        , Html.pre []
-            [ Html.text static.data.body
-            ]
+        , Markdown.toHtml [] static.data.body
         ]
     }

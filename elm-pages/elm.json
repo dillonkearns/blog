@@ -21,6 +21,7 @@
             "elm/url": "1.0.0",
             "elm-community/dict-extra": "2.4.0",
             "elm-community/list-extra": "8.4.0",
+            "elm-explorations/markdown": "1.0.0",
             "miniBill/elm-codec": "2.0.0",
             "noahzgordon/elm-color-extra": "1.0.2",
             "robinheghan/murmur3": "1.0.0",
