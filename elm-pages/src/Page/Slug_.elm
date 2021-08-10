@@ -117,7 +117,7 @@ view :
 view maybeUrl sharedModel static =
     { title = static.routeParams.slug
     , body =
-        [ Html.h2 [] [ Html.text static.data.title ]
+        [ Html.h1 [] [ Html.text static.data.title ]
         , Markdown.toHtml [] static.data.body
         ]
     }
