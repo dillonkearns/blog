@@ -6,6 +6,7 @@ import DataSource.Glob as Glob
 
 type alias Post =
     { slug : String
+    , filePath : String
     }
 
 
@@ -21,4 +22,5 @@ all =
                 )
             )
         |> Glob.match (Glob.literal ".md")
+        |> Glob.captureFilePath
         |> Glob.toDataSource

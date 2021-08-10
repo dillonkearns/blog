@@ -1,9 +1,11 @@
 module Page.Index exposing (Data, Model, Msg, page)
 
 import DataSource exposing (DataSource)
+import DataSource.File
 import Head
 import Head.Seo as Seo
 import Html exposing (Html)
+import OptimizedDecoder as Decode exposing (Decoder)
 import Page exposing (Page, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
@@ -37,16 +39,29 @@ page =
 data : DataSource Data
 data =
     Posts.all
-        |> DataSource.map
+        |> DataSource.andThen
             (List.map
-                (\{ slug } ->
-                    { title = "TODO TITLE"
-                    , route = Route.Slug_ { slug = slug }
-                    , date = "Yesterday"
-                    , excerpt = "TODO Excerpt"
-                    }
+                (\{ slug, filePath } ->
+                    DataSource.File.bodyWithFrontmatter
+                        blogPostDecoder
+                        filePath
+                        |> DataSource.map
+                            (\{ title, body } ->
+                                { title = title
+                                , route = Route.Slug_ { slug = slug }
+                                , date = "Yesterday"
+                                , excerpt = String.left 80 body ++ "..."
+                                }
+                            )
                 )
+                >> DataSource.combine
             )
+
+
+blogPostDecoder : String -> Decoder { title : String, body : String }
+blogPostDecoder body =
+    Decode.map (\title -> { title = title, body = body })
+        (Decode.field "title" Decode.string)
 
 
 head :
