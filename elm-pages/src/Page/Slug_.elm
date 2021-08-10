@@ -11,6 +11,7 @@ import OptimizedDecoder
 import Page exposing (Page, PageWithState, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
+import Posts
 import Shared
 import View exposing (View)
 
@@ -39,17 +40,7 @@ page =
 
 routes : DataSource (List RouteParams)
 routes =
-    Glob.succeed RouteParams
-        |> Glob.match (Glob.literal "../content/blog/")
-        |> Glob.capture Glob.wildcard
-        |> Glob.match
-            (Glob.oneOf
-                ( ( "", () )
-                , [ ( "/index", () ) ]
-                )
-            )
-        |> Glob.match (Glob.literal ".md")
-        |> Glob.toDataSource
+    Posts.all |> DataSource.map (List.map RouteParams)
 
 
 findFileBySlug : RouteParams -> DataSource String
