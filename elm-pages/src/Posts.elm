@@ -4,9 +4,14 @@ import DataSource exposing (DataSource)
 import DataSource.Glob as Glob
 
 
-all : DataSource (List String)
+type alias Post =
+    { slug : String
+    }
+
+
+all : DataSource (List Post)
 all =
-    Glob.succeed identity
+    Glob.succeed Post
         |> Glob.match (Glob.literal "../content/blog/")
         |> Glob.capture Glob.wildcard
         |> Glob.match

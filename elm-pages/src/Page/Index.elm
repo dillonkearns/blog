@@ -3,10 +3,12 @@ module Page.Index exposing (Data, Model, Msg, page)
 import DataSource exposing (DataSource)
 import Head
 import Head.Seo as Seo
-import Html
+import Html exposing (Html)
 import Page exposing (Page, StaticPayload)
 import Pages.PageUrl exposing (PageUrl)
 import Pages.Url
+import Posts
+import Route exposing (Route)
 import Shared
 import View exposing (View)
 
@@ -34,7 +36,17 @@ page =
 
 data : DataSource Data
 data =
-    DataSource.succeed ()
+    Posts.all
+        |> DataSource.map
+            (List.map
+                (\{ slug } ->
+                    { title = "TODO TITLE"
+                    , route = Route.Slug_ { slug = slug }
+                    , date = "Yesterday"
+                    , excerpt = "TODO Excerpt"
+                    }
+                )
+            )
 
 
 head :
@@ -58,7 +70,15 @@ head static =
 
 
 type alias Data =
-    ()
+    List BlogEntry
+
+
+type alias BlogEntry =
+    { title : String
+    , route : Route
+    , date : String
+    , excerpt : String
+    }
 
 
 view :
@@ -68,5 +88,14 @@ view :
     -> View Msg
 view maybeUrl sharedModel static =
     { title = "Placeholder"
-    , body = [ Html.text "Hello!!" ]
+    , body = List.map viewBlogEntry static.data
     }
+
+
+viewBlogEntry : BlogEntry -> Html msg
+viewBlogEntry blogEntry =
+    Html.article []
+        [ Route.link blogEntry.route [] [ Html.text blogEntry.title ]
+        , Html.span [] [ Html.text blogEntry.date ]
+        , Html.p [] [ Html.text blogEntry.excerpt ]
+        ]

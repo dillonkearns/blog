@@ -40,7 +40,7 @@ page =
 
 routes : DataSource (List RouteParams)
 routes =
-    Posts.all |> DataSource.map (List.map RouteParams)
+    Posts.all |> DataSource.map (List.map (\post -> { slug = post.slug }))
 
 
 findFileBySlug : RouteParams -> DataSource String
