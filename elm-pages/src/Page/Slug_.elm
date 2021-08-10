@@ -28,7 +28,7 @@ type alias RouteParams =
 
 page : Page RouteParams Data
 page =
-    Page.prerenderedRoute
+    Page.prerender
         { head = head
         , routes = routes
         , data = data
@@ -53,7 +53,7 @@ routes =
 
 findFileBySlug : RouteParams -> DataSource String
 findFileBySlug routeParams =
-    Glob.succeed ()
+    Glob.succeed identity
         |> Glob.match (Glob.literal "../content/blog/")
         |> Glob.match (Glob.literal routeParams.slug)
         |> Glob.match
@@ -63,7 +63,8 @@ findFileBySlug routeParams =
                 )
             )
         |> Glob.match (Glob.literal ".md")
-        |> Glob.expectUniqueFile
+        |> Glob.captureFilePath
+        |> Glob.expectUniqueMatch
 
 
 data : RouteParams -> DataSource Data
@@ -71,10 +72,13 @@ data routeParams =
     findFileBySlug routeParams
         |> DataSource.andThen
             (\filePath ->
-                OptimizedDecoder.map2 Data
-                    DataSource.File.body
-                    (DataSource.File.frontmatter (OptimizedDecoder.field "title" OptimizedDecoder.string))
-                    |> DataSource.File.request filePath
+                DataSource.File.bodyWithFrontmatter
+                    (\body ->
+                        OptimizedDecoder.map
+                            (Data body)
+                            (OptimizedDecoder.field "title" OptimizedDecoder.string)
+                    )
+                    filePath
             )
 
 

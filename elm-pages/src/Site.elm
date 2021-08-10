@@ -13,12 +13,11 @@ type alias Data =
 
 config : SiteConfig Data
 config =
-    \_ ->
-        { data = data
-        , canonicalUrl = "https://elm-pages.com"
-        , manifest = manifest
-        , head = head
-        }
+    { data = data
+    , canonicalUrl = "https://elm-pages.com"
+    , manifest = manifest
+    , head = head
+    }
 
 
 data : DataSource.DataSource Data
@@ -37,6 +36,6 @@ manifest static =
     Manifest.init
         { name = "Site Name"
         , description = "Description"
-        , startUrl = Route.Index {} |> Route.toPath
+        , startUrl = Route.Index |> Route.toPath
         , icons = []
         }
